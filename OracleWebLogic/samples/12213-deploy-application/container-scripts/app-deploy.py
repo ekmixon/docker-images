@@ -18,12 +18,12 @@ appfile    = os.environ.get('APP_FILE', 'simple-app.war')
 appdir     = os.environ.get('DOMAIN_HOME')
 cluster_name = os.environ.get("CLUSTER_NAME", "DockerCluster")
 
-print('Domain Home      : [%s]' % domainhome);
-print('Admin Name       : [%s]' % admin_name);
-print('Cluster Name     : [%s]' % cluster_name);
-print('Application Name : [%s]' % appname);
-print('appfile          : [%s]' % appfile);
-print('appdir           : [%s]' % appdir);
+print(f'Domain Home      : [{domainhome}]');
+print(f'Admin Name       : [{admin_name}]');
+print(f'Cluster Name     : [{cluster_name}]');
+print(f'Application Name : [{appname}]');
+print(f'appfile          : [{appfile}]');
+print(f'appdir           : [{appdir}]');
 # Read Domain in Offline Mode
 # ===========================
 readDomain(domainhome)
@@ -32,7 +32,7 @@ readDomain(domainhome)
 # ==================
 cd('/')
 app = create(appname, 'AppDeployment')
-app.setSourcePath(appdir + '/' + appfile)
+app.setSourcePath(f'{appdir}/{appfile}')
 app.setStagingMode('nostage')
 
 # Assign application to AdminServer

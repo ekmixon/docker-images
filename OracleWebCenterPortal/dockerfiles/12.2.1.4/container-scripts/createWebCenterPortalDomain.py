@@ -204,10 +204,10 @@ class WCPortal12214Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 

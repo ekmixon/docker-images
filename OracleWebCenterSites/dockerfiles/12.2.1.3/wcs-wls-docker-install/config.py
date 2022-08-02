@@ -61,7 +61,7 @@ class WCSITES12213Provisioner:
 
     def createBaseDomain(self, domainName, user, password, adminListenPort, adminName, managedNameBase, managedServerPort, prodMode, managedCount, clusterName, domainType):
         baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
-        
+
         readTemplate(baseTemplate)
         setOption('DomainName', domainName)
         setOption('JavaHome', self.javaHome)
@@ -70,67 +70,65 @@ class WCSITES12213Provisioner:
         else:
             setOption('ServerStartMode', 'dev')
         set('Name', domainName)
-        
+
         admin_port = int(adminListenPort)
         ms_port    = int(managedServerPort)
         ms_count   = int(managedCount)
-        
-        # Create Admin Server
-        # =======================
-        print 'Creating Admin Server...'
+
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         cd('/Servers/AdminServer')
         #set('ListenAddress', '%s-%s' % (domain_uid, admin_server_name_svc))
         set('ListenPort', admin_port)
         set('Name', adminName)
-		
 		# Define the user password for weblogic
         # =====================================
-        cd('/Security/' + domainName + '/User/weblogic')
+        cd(f'/Security/{domainName}/User/weblogic')
         set('Name', user)
         set('Password', password)
-        
-        # Create a cluster
-        # ======================
-        print 'Creating cluster...'
+
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         cd('/')
         cl=create(clusterName, 'Cluster')
-		
-		# Create Node Manager
-        # =======================
-        print 'Creating Node Managers...'
+
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         for machine in self.MACHINES:
             cd('/')
             create(machine, 'Machine')
-            cd('Machine/' + machine)
+            cd(f'Machine/{machine}')
             create(machine, 'NodeManager')
-            cd('NodeManager/' + machine)
+            cd(f'NodeManager/{machine}')
             for param in self.MACHINES[machine]:
                 set(param, self.MACHINES[machine][param])
         # Create managed servers
-        for index in range(0, ms_count):
+        for index in range(ms_count):
             cd('/')
             msIndex = index+1
             cd('/')
-            name = '%s%s' % (managedNameBase, msIndex)
+            name = f'{managedNameBase}{msIndex}'
             create(name, 'Server')
-            cd('/Servers/%s/' % name )
-            print('managed server name is %s' % name);
+            cd(f'/Servers/{name}/')
+            print(f'managed server name is {name}');
             set('ListenPort', ms_port)
             set('NumOfRetriesBeforeMSIMode', 0)
             set('RetryIntervalBeforeMSIMode', 1)
             set('Cluster', clusterName)
             set('Machine', machineName)
             self.MANAGED_SERVERS.append(name)
-        print self.MANAGED_SERVERS
-        
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         setOption('OverwriteDomain', 'true')
-        domainHome = self.domainParentDir + '/' + domainName
-        print 'Will create Base domain at ' + domainHome
-        
-        print 'Writing base domain...'
+        domainHome = f'{self.domainParentDir}/{domainName}'
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         writeDomain(domainHome)
         closeTemplate()
-        print 'Base domain created at ' + domainHome
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         return domainHome
 
     def readAndApplyJRFTemplates(self, domainHome, db, dbPrefix, dbPassword, exposeAdminT3Channel, t3ChannelPublicAddress, t3ChannelPort):
@@ -280,10 +278,10 @@ class WCSITES12213Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 
@@ -302,14 +300,14 @@ class WCSITES12213Provisioner:
         return result
 
     def enable_admin_channel(self, admin_channel_address, admin_channel_port):
-        if admin_channel_address == None or admin_channel_port == 'None':
+        if admin_channel_address is None or admin_channel_port == 'None':
             return
         cd('/')
         admin_server_name = get('AdminServerName')
-        print('setting admin server t3channel for ' + admin_server_name)
-        cd('/Servers/' + admin_server_name)
+        print(f'setting admin server t3channel for {admin_server_name}')
+        cd(f'/Servers/{admin_server_name}')
         create('T3Channel', 'NetworkAccessPoint')
-        cd('/Servers/' + admin_server_name + '/NetworkAccessPoint/T3Channel')
+        cd(f'/Servers/{admin_server_name}/NetworkAccessPoint/T3Channel')
         set('ListenPort', int(admin_channel_port))
         set('PublicPort', int(admin_channel_port))
         set('PublicAddress', admin_channel_address)	

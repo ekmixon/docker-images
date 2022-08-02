@@ -153,14 +153,14 @@ class SOA12212Provisioner:
     def createDomain(self, name, user, password, db, dbPrefix, dbPassword,domainType):
         domainHome = self.createBaseDomain(name, user, password,domainType)
 
-        if domainType == "soa" or domainType == "soaosb":
-                self.extendSoaDomain(domainHome, db, dbPrefix, dbPassword)
+        if domainType in ["soa", "soaosb"]:
+            self.extendSoaDomain(domainHome, db, dbPrefix, dbPassword)
 
-        if domainType == "soaess" or domainType == "soaessosb" :
-               self.extendSoaEssDomain(domainHome, db, dbPrefix, dbPassword)
+        if domainType in ["soaess", "soaessosb"]:
+            self.extendSoaEssDomain(domainHome, db, dbPrefix, dbPassword)
 
-        if domainType == "osb" or domainType == "soaosb" or domainType == "soaessosb" :
-                self.extendOsbDomain(domainHome, db, dbPrefix, dbPassword,domainType)
+        if domainType in ["osb", "soaosb", "soaessosb"]:
+            self.extendOsbDomain(domainHome, db, dbPrefix, dbPassword,domainType)
 
         if domainType == "bpm":
                 self.extendBpmDomain(domainHome, db, dbPrefix, dbPassword)
@@ -313,19 +313,19 @@ class SOA12212Provisioner:
 
     def targetSOAServers(self,serverGroupsToTarget):
         for server in self.SOA_SERVERS:
-            if not server == 'AdminServer':
+            if server != 'AdminServer':
                 setServerGroups(server, serverGroupsToTarget)
-                print "INFO: Set CoherenceClusterSystemResource to defaultCoherenceCluster for server:" + server
-                cd('/Servers/' + server)
+                setServerGroups(server, serverGroupsToTarget)
+                cd(f'/Servers/{server}')
                 set('CoherenceClusterSystemResource', 'defaultCoherenceCluster')
         return
 
     def targetSOAESSServers(self,serverGroupsToTarget):
         for server in self.SOA_ESS_SERVERS:
-            if not server == 'AdminServer':
+            if server != 'AdminServer':
                 setServerGroups(server, serverGroupsToTarget)
-                print "INFO: Set CoherenceClusterSystemResource to defaultCoherenceCluster for server:" + server
-                cd('/Servers/' + server)
+                setServerGroups(server, serverGroupsToTarget)
+                cd(f'/Servers/{server}')
                 set('CoherenceClusterSystemResource', 'defaultCoherenceCluster')
         return
 
@@ -345,10 +345,10 @@ class SOA12212Provisioner:
 
     def targetOSBServers(self,serverGroupsToTarget):
         for server in self.OSB_SERVERS:
-            if not server == 'AdminServer':
+            if server != 'AdminServer':
                 setServerGroups(server, serverGroupsToTarget)
-                print "INFO: Set CoherenceClusterSystemResource to defaultCoherenceCluster for server:" + server
-                cd('/Servers/' + server)
+                setServerGroups(server, serverGroupsToTarget)
+                cd(f'/Servers/{server}')
                 set('CoherenceClusterSystemResource', 'defaultCoherenceCluster')
         return
 
@@ -523,10 +523,10 @@ class SOA12212Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 

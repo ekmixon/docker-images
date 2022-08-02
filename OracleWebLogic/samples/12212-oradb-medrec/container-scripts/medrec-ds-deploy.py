@@ -15,23 +15,27 @@ readDomain(domainhome)
 
 # Create Datasource
 # ==================
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 cmo.setName(dsname)
 
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 cd('JDBCDriverParams/NO_NAME_0')
 set('DriverName', dsdriver)
 set('URL', dsurl)
 set('PasswordEncrypted', dspassword)
 set('UseXADataSourceInterface', 'false')
 
-print 'create JDBCDriverParams User Properties'
+import os
+
+
 cd('Properties/NO_NAME_0')
 cd('Property/user')
 set('Value', dsusername)
 
-print 'create Test Table Name JDBCConnectionPoolParams'
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+import os
+
+
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 cd('JDBCConnectionPoolParams/NO_NAME_0')
 set('TestTableName','SQL SELECT 1 FROM DUAL')
 

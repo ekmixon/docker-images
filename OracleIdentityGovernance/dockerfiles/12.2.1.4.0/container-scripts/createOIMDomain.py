@@ -71,34 +71,34 @@ class OIMProvisioner:
         setOption('JavaHome', self.javaHome)
         setOption('ServerStartMode', 'prod')
         set('Name', domainName)
-        cd('/Security/' + domainName + '/User/weblogic')
+        cd(f'/Security/{domainName}/User/weblogic')
         set('Name', user)
         set('Password', password)
 
-        print 'Creating Node Managers...'
+        selectTemplate('Basic WebLogic Server Domain')
         for machine in self.MACHINES:
             cd('/')
             create(machine, 'Machine')
-            cd('Machine/' + machine)
+            cd(f'Machine/{machine}')
             create(machine, 'NodeManager')
-            cd('NodeManager/' + machine)
+            cd(f'NodeManager/{machine}')
             for param in self.MACHINES[machine]:
                 set(param, self.MACHINES[machine][param])
 
-        print 'Creating Admin server...'
+        selectTemplate('Basic WebLogic Server Domain')
         for server in self.SERVERS:
             cd('/')
             if server == 'AdminServer':
-                cd('Server/' + server)
+                cd(f'Server/{server}')
                 for param in self.SERVERS[server]:
                     set(param, self.SERVERS[server][param])
                     continue
         setOption('OverwriteDomain', 'true')
-        domainHome = self.domainParentDir + '/' + name
-        print 'Writing base domain...'
+        domainHome = f'{self.domainParentDir}/{name}'
+        selectTemplate('Basic WebLogic Server Domain')
         writeDomain(domainHome)
         closeTemplate()
-        print 'Base domain created at ' + domainHome
+        selectTemplate('Basic WebLogic Server Domain')
         return domainHome
 
     def extendOimDomain(self, domainHome, db, dbPrefix, dbPassword, user, password, hostName):
@@ -316,10 +316,10 @@ class OIMProvisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 
@@ -339,14 +339,16 @@ class OIMProvisioner:
 
 
     def enable_admin_channel(self, server_name, channel_address, channel_port):
-        print('setting server t3channel for server ' + server_name)
-        cd('/Servers/' + server_name)
+        print(f'setting server t3channel for server {server_name}')
+        cd(f'/Servers/{server_name}')
         create('T3Channel', 'NetworkAccessPoint')
-        cd('/Servers/' + server_name + '/NetworkAccessPoint/T3Channel')
+        cd(f'/Servers/{server_name}/NetworkAccessPoint/T3Channel')
         set('ListenPort', int(channel_port))
         set('PublicPort', int(channel_port))
         set('PublicAddress', channel_address)
-        print('t3 channel created for server: ' + server_name + 'for address: ' + channel_address )
+        print(
+            f't3 channel created for server: {server_name}for address: {channel_address}'
+        )
 
 
 #############################

@@ -7,7 +7,7 @@ admin_name = os.environ['ADMIN_USERNAME']
 admin_pass = os.environ['ADMIN_PASSWORD']
 admin_port = os.environ['ADMIN_PORT']
 admin_host = sys.argv[1]
-url = admin_host + ':' + admin_port
+url = f'{admin_host}:{admin_port}'
 
 connect(admin_name, admin_pass, url)
 

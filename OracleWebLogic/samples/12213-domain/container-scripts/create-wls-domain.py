@@ -32,16 +32,16 @@ cluster_name                  = CLUSTER_NAME
 cluster_type                  = CLUSTER_TYPE
 production_mode               = PRODUCTION_MODE
 
-print('domain_path              : [%s]' % domain_path);
-print('domain_name              : [%s]' % domain_name);
-print('admin_server_name        : [%s]' % admin_server_name);
-print('admin_port               : [%s]' % admin_port);
-print('cluster_name             : [%s]' % cluster_name);
-print('server_port              : [%s]' % server_port);
-print('number_of_ms             : [%s]' % number_of_ms);
-print('cluster_type             : [%s]' % cluster_type);
-print('managed_server_name_base : [%s]' % managed_server_name_base);
-print('production_mode          : [%s]' % production_mode);
+print(f'domain_path              : [{domain_path}]');
+print(f'domain_name              : [{domain_name}]');
+print(f'admin_server_name        : [{admin_server_name}]');
+print(f'admin_port               : [{admin_port}]');
+print(f'cluster_name             : [{cluster_name}]');
+print(f'server_port              : [{server_port}]');
+print(f'number_of_ms             : [{number_of_ms}]');
+print(f'cluster_type             : [{cluster_type}]');
+print(f'managed_server_name_base : [{managed_server_name_base}]');
+print(f'production_mode          : [{production_mode}]');
 
 # Open default domain template
 # ============================
@@ -50,8 +50,8 @@ readTemplate("/u01/oracle/wlserver/common/templates/wls/wls.jar")
 set('Name', domain_name)
 setOption('DomainName', domain_name)
 create(domain_name,'Log')
-cd('/Log/%s' % domain_name);
-set('FileName', '%s.log' % (domain_name))
+cd(f'/Log/{domain_name}');
+set('FileName', f'{domain_name}.log')
 
 # Configure the Administration Server
 # ===================================
@@ -62,7 +62,7 @@ set('Name', admin_server_name)
 
 # Set the admin user's username and password
 # ==========================================
-cd('/Security/%s/User/weblogic' % domain_name)
+cd(f'/Security/{domain_name}/User/weblogic')
 cmo.setName(username)
 cmo.setPassword(password)
 
@@ -79,58 +79,56 @@ cl=create(cluster_name, 'Cluster')
 if cluster_type == "CONFIGURED":
 
   # Create managed servers
-  for index in range(0, number_of_ms):
+  for index in range(number_of_ms):
     cd('/')
     msIndex = index+1
 
     cd('/')
-    name = '%s%s' % (managed_server_name_base, msIndex)
+    name = f'{managed_server_name_base}{msIndex}'
 
     create(name, 'Server')
-    cd('/Servers/%s/' % name )
-    print('managed server name is %s' % name);
+    cd(f'/Servers/{name}/')
+    print(f'managed server name is {name}');
     set('ListenPort', server_port)
     set('NumOfRetriesBeforeMSIMode', 0)
     set('RetryIntervalBeforeMSIMode', 1)
     set('Cluster', cluster_name)
 
 else:
-  print('Configuring Dynamic Cluster %s' % cluster_name)
+  print(f'Configuring Dynamic Cluster {cluster_name}')
 
-  templateName = cluster_name + "-template"
-  print('Creating Server Template: %s' % templateName)
+  templateName = f"{cluster_name}-template"
+  print(f'Creating Server Template: {templateName}')
   st1=create(templateName, 'ServerTemplate')
-  print('Done creating Server Template: %s' % templateName)
-  cd('/ServerTemplates/%s' % templateName)
+  print(f'Done creating Server Template: {templateName}')
+  cd(f'/ServerTemplates/{templateName}')
   cmo.setListenPort(server_port)
   cmo.setCluster(cl)
 
-  cd('/Clusters/%s' % cluster_name)
+  cd(f'/Clusters/{cluster_name}')
   create(cluster_name, 'DynamicServers')
-  cd('DynamicServers/%s' % cluster_name)
+  cd(f'DynamicServers/{cluster_name}')
   set('ServerTemplate', st1)
   set('ServerNamePrefix', managed_server_name_base)
   set('DynamicClusterSize', number_of_ms)
   set('MaxDynamicClusterSize', number_of_ms)
   set('CalculatedListenPorts', false)
 
-  print('Done setting attributes for Dynamic Cluster: %s' % cluster_name);
+  print(f'Done setting attributes for Dynamic Cluster: {cluster_name}');
 
 # Write Domain
 # ============
 writeDomain(domain_path)
 closeTemplate()
-print 'Domain Created'
-
+domain_name                   = DOMAIN_NAME
 # Update Domain
 readDomain(domain_path)
 cd('/')
 setOption('ServerStartMode',production_mode)
 updateDomain()
 closeDomain()
-print 'Domain Updated'
-print 'Done'
-
+domain_name                   = DOMAIN_NAME
+domain_name
 # Exit WLST
 # =========
 exit()

@@ -26,7 +26,7 @@ exthost=sys.argv[4]
 #
 # Setting domain path
 # ===================
-domain_path  = domain_root + '/' + domain_name
+domain_path = f'{domain_root}/{domain_name}'
 
 #
 # Read domain for updates
@@ -37,7 +37,7 @@ readDomain(domain_path)
 # Set listen address
 # ==================
 cd('/')
-cd('/Server/'+server)
+cd(f'/Server/{server}')
 cmo.setListenAddress(manserver_host)
 cmo.setExternalDNSName(exthost)
 

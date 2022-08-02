@@ -10,18 +10,18 @@
 domain_name  = os.environ.get("DOMAIN_NAME", "base_domain")
 admin_name  = os.environ.get("ADMIN_NAME", "AdminServer")
 admin_listen_port   = int(os.environ.get("ADMIN_LISTEN_PORT", "7001"))
-domain_path  = '/u01/oracle/user_projects/domains/%s' % domain_name
+domain_path = f'/u01/oracle/user_projects/domains/{domain_name}'
 production_mode = os.environ.get("PRODUCTION_MODE", "prod")
 administration_port_enabled = os.environ.get("ADMINISTRATION_PORT_ENABLED", "true")
 administration_port = int(os.environ.get("ADMINISTRATION_PORT", "9002"))
 
-print('domain_name                 : [%s]' % domain_name);
-print('admin_listen_port           : [%s]' % admin_listen_port);
-print('domain_path                 : [%s]' % domain_path);
-print('production_mode             : [%s]' % production_mode);
-print('admin name                  : [%s]' % admin_name);
-print('administration_port_enabled : [%s]' % administration_port_enabled);
-print('administration_port         : [%s]' % administration_port);
+print(f'domain_name                 : [{domain_name}]');
+print(f'admin_listen_port           : [{admin_listen_port}]');
+print(f'domain_path                 : [{domain_path}]');
+print(f'production_mode             : [{production_mode}]');
+print(f'admin name                  : [{admin_name}]');
+print(f'administration_port_enabled : [{administration_port_enabled}]');
+print(f'administration_port         : [{administration_port}]');
 
 # Open default domain template
 # ============================
@@ -53,7 +53,7 @@ if administration_port_enabled != "false":
 
 # Define the user password for weblogic
 # =====================================
-cd(('/Security/%s/User/weblogic') % domain_name)
+cd(f'/Security/{domain_name}/User/weblogic')
 cmo.setName(username)
 cmo.setPassword(password)
 

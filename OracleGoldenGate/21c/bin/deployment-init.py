@@ -45,8 +45,8 @@ def get_admin_credentials():
 
 def wait_for_service(port):
     """Return once an SCA service is running, waiting up to two minutes"""
-    url = 'http://' + service_address + ':' + str(port) + '/services/v2'
-    for sequence in range(24):
+    url = f'http://{service_address}:{str(port)}/services/v2'
+    for _ in range(24):
         try:
             urllib.request.urlopen(url).read()
             return True
@@ -57,20 +57,23 @@ def wait_for_service(port):
 
 def find_process(processName):
     """Locate a process running locally"""
-    for process in psutil.process_iter(['name']):
-        if process.info['name'] == processName:
-            return process
-    return None
+    return next(
+        (
+            process
+            for process in psutil.process_iter(['name'])
+            if process.info['name'] == processName
+        ),
+        None,
+    )
 
 
 def terminate_process(processName):
     """Terminate a process running locally"""
-    process = find_process(processName)
-    if process:
+    if process := find_process(processName):
         process.terminate()
-        for attempt in range(0, 10):
+        for _ in range(10):
             time.sleep(1)
-            if find_process(processName) == None:
+            if find_process(processName) is None:
                 return
         process.kill()
 
@@ -93,25 +96,17 @@ def get_requests_session():
 
 
 def get_network_config(serviceListeningPort):
-    if (listen_on == '0.0.0.0'):
-        networkConfig = {
-            'serviceListeningPort': serviceListeningPort
-        }
-    else:
-        networkConfig = {
+    return (
+        {'serviceListeningPort': serviceListeningPort}
+        if (listen_on == '0.0.0.0')
+        else {
             'serviceListeningPort': {
                 'address': listen_on,
-                'port':    serviceListeningPort
+                'port': serviceListeningPort,
             },
-            'ipACL': [
-                {
-                    'address':     listen_on,
-                    'permission': 'allow'
-                }
-            ]
+            'ipACL': [{'address': listen_on, 'permission': 'allow'}],
         }
-
-    return networkConfig
+    )
 
 
 def reset_servicemanager_configuration():
@@ -136,7 +131,15 @@ def get_digest_authentication():
 
 def get_service_config(serviceName):
     """Retrieve the configuration of a service from Service Manager"""
-    url = 'http://' + service_address + ':' + str(service_ports['ServiceManager']) + '/services/v2/deployments/' + os.environ['OGG_DEPLOYMENT'] + '/services/' + serviceName
+    url = (
+        f'http://{service_address}:'
+        + str(service_ports['ServiceManager'])
+        + '/services/v2/deployments/'
+        + os.environ['OGG_DEPLOYMENT']
+        + '/services/'
+        + serviceName
+    )
+
     response = get_requests_session().get(url, headers=rest_call_headers, auth=get_digest_authentication())
     if response.status_code == 200:
         response_json = response.json()
@@ -148,7 +151,15 @@ def get_service_config(serviceName):
 
 def set_service_config(serviceName, config):
     """Sets the configuration of a service in Service Manager and restart the service"""
-    url = 'http://' + service_address + ':' + str(service_ports['ServiceManager']) + '/services/v2/deployments/' + os.environ['OGG_DEPLOYMENT'] + '/services/' + serviceName
+    url = (
+        f'http://{service_address}:'
+        + str(service_ports['ServiceManager'])
+        + '/services/v2/deployments/'
+        + os.environ['OGG_DEPLOYMENT']
+        + '/services/'
+        + serviceName
+    )
+
     body = {
         'config': config,
         'status': 'restart'
@@ -170,9 +181,9 @@ def reset_service_configuration(serviceName):
 
 def option(name, value = None):
     """Compose a command line option"""
-    result = ' --' + name
+    result = f' --{name}'
     if value:
-        result += '=' + str(value)
+        result += f'={str(value)}'
     return result
 
 

@@ -2,7 +2,7 @@ import sys
 
 domain_name  = sys.argv[1]
 template_location = sys.argv[2]
-domain_path  = sys.argv[3] + '/%s' % domain_name
+domain_path = sys.argv[3] + f'/{domain_name}'
 user_name = sys.argv[4]
 password = sys.argv[5]
 as_port = int(sys.argv[6])
@@ -12,17 +12,17 @@ production_mode = sys.argv[9]
 number_of_ms = int(sys.argv[10])
 ms_name_prefix = sys.argv[11]
 
-print('domain_name     : [%s]' % domain_name);
-print('template_location     : [%s]' % template_location);
-print('domain_path     : [%s]' % domain_path);
-print('user_name     : [%s]' % user_name);
+print(f'domain_name     : [{domain_name}]');
+print(f'template_location     : [{template_location}]');
+print(f'domain_path     : [{domain_path}]');
+print(f'user_name     : [{user_name}]');
 print('password     : ********');
-print('as_port      : [%s]' % as_port);
-print('ms_name  : [%s]' % ms_name);
-print('ms_port     : [%s]' % ms_port);
-print('production_mode : [%s]' % production_mode);
-print('number_of_ms : [%s]' % number_of_ms);
-print('ms_name_prefix  : [%s]' % ms_name_prefix);
+print(f'as_port      : [{as_port}]');
+print(f'ms_name  : [{ms_name}]');
+print(f'ms_port     : [{ms_port}]');
+print(f'production_mode : [{production_mode}]');
+print(f'number_of_ms : [{number_of_ms}]');
+print(f'ms_name_prefix  : [{ms_name_prefix}]');
 
 # Open default domain template
 # ======================
@@ -42,7 +42,7 @@ set('ListenPort', as_port)
 
 # Define the user password for weblogic
 # =====================================
-cd(('/Security/%s/User/' + user_name) % domain_name)
+cd(f'/Security/%s/User/{user_name}' % domain_name)
 cmo.setPassword(password)
 
 # Write the domain and close the domain template
@@ -53,18 +53,18 @@ setOption('ServerStartMode',production_mode)
 # Create Server & set MSI configuration
 # =====================================
 cd('/')
-sys.stdout.write('Creating %s servers' % number_of_ms)
+sys.stdout.write(f'Creating {number_of_ms} servers')
 sys.stdout.flush()
 for index in range(1, number_of_ms + 1):
   cd('/')
   sys.stdout.write('.')
   sys.stdout.flush()
   create(ms_name_prefix + str(index), 'Server')
-  cd('/Servers/%s/' % (ms_name_prefix + str(index) ))
+  cd(f'/Servers/{ms_name_prefix + str(index)}/')
   set('ListenPort', ms_port)
   set('NumOfRetriesBeforeMSIMode', 0)
   set('RetryIntervalBeforeMSIMode', 1)
-print 'Done'
+import sys
 
 # Write Domain
 # ============

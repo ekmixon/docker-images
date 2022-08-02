@@ -242,14 +242,14 @@ def latest(wls, template):
     versions = ["12.1.4"]
 
     for v in versions:
-        temp = wls + "/" + template.replace("12.1.3", v)
+        temp = f"{wls}/" + template.replace("12.1.3", v)
 
         if os.path.exists(temp):
             return temp
-    
+
     # Nothing found: old default
 
-    return wls + "/" + template
+    return f"{wls}/{template}"
 
 def deployedq(path, target):
     return deployear("edq", path, target)
@@ -257,7 +257,7 @@ def deployedq(path, target):
 def deployear(name, path, target):
     cd("/")
     create(name, "AppDeployment")
-    cd("/AppDeployments/" + name)
+    cd(f"/AppDeployments/{name}")
     cmo.setSourcePath(path)
     cmo.setModuleType("ear")
     cmo.setStagingMode("nostage")
@@ -291,24 +291,24 @@ def createds(name, dbhost, dbport, service, username, pw, target, max=200, jndin
 
             if px > 0:
                 port = h[px+1:]
-                h    = h[0:px]
+                h = h[:px]
 
-            url = url + "(ADDRESS=(PROTOCOL=TCP)(HOST=" + h + ")(PORT=" + port + "))"
+            url = f"{url}(ADDRESS=(PROTOCOL=TCP)(HOST={h})(PORT={port}))"
 
-        url = url + ")(CONNECT_DATA=(SERVICE_NAME=" + service + ")))"
+        url = f"{url})(CONNECT_DATA=(SERVICE_NAME={service})))"
 
     else:
         # Add default host if required
 
         if dbhost.find(":") < 0:
-            dbhost = dbhost + ":" + dbport
+            dbhost = f"{dbhost}:{dbport}"
 
-        url = "jdbc:oracle:thin:@" + dbhost + "/" + service
+        url = f"jdbc:oracle:thin:@{dbhost}/{service}"
 
     # Create bean and subbeans
 
     create(name, 'JDBCSystemResource')
-    cd('/JDBCSystemResource/' + name);
+    cd(f'/JDBCSystemResource/{name}');
 
     result = cmo;
 
@@ -317,7 +317,7 @@ def createds(name, dbhost, dbport, service, username, pw, target, max=200, jndin
     else:
         cmo.setTargets([target])
 
-    cd('JdbcResource/' + name)
+    cd(f'JdbcResource/{name}')
 
     if agl:
         cmo.setDatasourceType("AGL")
@@ -333,7 +333,7 @@ def createds(name, dbhost, dbport, service, username, pw, target, max=200, jndin
 
     cd('JDBCConnectionPoolParams/NO_NAME_0')
     cmo.setMaxCapacity(max)
-    cmo.setTestTableName('SQL ISVALID') 
+    cmo.setTestTableName('SQL ISVALID')
     cmo.setTestConnectionsOnReserve(true)
     cmo.setStatementCacheSize(0)
 
@@ -341,8 +341,8 @@ def createds(name, dbhost, dbport, service, username, pw, target, max=200, jndin
 
     cd('../../JDBCDataSourceParams/NO_NAME_0')
 
-    if jndiname == None:
-        cmo.setJNDINames(['jdbc/' + name])
+    if jndiname is None:
+        cmo.setJNDINames([f'jdbc/{name}'])
     else:
         cmo.setJNDINames([jndiname])
 
@@ -380,12 +380,12 @@ def createmailsession(name, properties, target=None, username=None, password=Non
     # Create bean and subbeans
 
     create(name, 'MailSession')
-    cd('/MailSession/' + name);
+    cd(f'/MailSession/{name}');
 
     result = cmo;
 
-    if jndiname == None:
-        cmo.setJNDIName('mail/' + name)
+    if jndiname is None:
+        cmo.setJNDIName(f'mail/{name}')
     else:
         cmo.setJNDIName(jndiname)
 
@@ -419,7 +419,7 @@ def createcluster(name, address, domaindir=None, cohport=0, wka=None):
     cd('/')
     create(name, 'Cluster')
 
-    cd('Clusters/' + name)
+    cd(f'Clusters/{name}')
     cluster = cmo
     cmo.setClusterMessagingMode('unicast')
     cmo.setClusterAddress(address)
@@ -455,10 +455,10 @@ def createcluster(name, address, domaindir=None, cohport=0, wka=None):
                     port = w["port"];
 
             create(name, 'CoherenceClusterWellKnownAddress')
-            cd("CoherenceClusterWellKnownAddress/" + name)
+            cd(f"CoherenceClusterWellKnownAddress/{name}")
 
             cmo.setListenAddress(addr)
-            
+
             if port != None:
                 cmo.setListenPort(port)
 
@@ -477,25 +477,24 @@ def createserver(name, port, listenaddress=None, machine=None, cluster=None, coh
     create(name, "Server")
 
     if cluster != None:
-        cd('/Clusters/' + cluster)
+        cd(f'/Clusters/{cluster}')
         clusbean = cmo
 
     if machine != None:
-        cd("/Machines/" + machine)
+        cd(f"/Machines/{machine}")
         machbean = cmo
 
-    cd('/Servers/' + name)
+    cd(f'/Servers/{name}')
 
     result = cmo
 
     if listenaddress != None:
         cmo.setListenAddress(listenaddress)
-    else:
-        if cohhost != None:
-            cmo.setListenAddress(cohhost)
-        else:
-            cmo.setListenAddress('')
+    elif cohhost is None:
+        cmo.setListenAddress('')
 
+    else:
+        cmo.setListenAddress(cohhost)
     cmo.setListenPort(port)
     cmo.setIgnoreSessionsDuringShutdown(true)
     cmo.setWeblogicPluginEnabled(true)
@@ -507,7 +506,7 @@ def createserver(name, port, listenaddress=None, machine=None, cluster=None, coh
         cmo.setCluster(clusbean)
         servercoherence(name, cohport, cohhost)
 
-    cd('/Servers/' + name)
+    cd(f'/Servers/{name}')
 
     if machine != None:
         cmo.setMachine(machbean)
@@ -516,24 +515,17 @@ def createserver(name, port, listenaddress=None, machine=None, cluster=None, coh
 
     sgrps = servergroups
 
-    if sgrps == None:
+    if sgrps is None:
 
         # EDQ references OWSM in 12.2.1.3.0+
 
         if withedq:
-            if v122130:
-                sgrps = ["EDQ-MGD-SVRS"]
-            else:
-                sgrps = ["EDQ-MGD-SVRS", "WSMPM-MAN-SVR"]
-
+            sgrps = ["EDQ-MGD-SVRS"] if v122130 else ["EDQ-MGD-SVRS", "WSMPM-MAN-SVR"]
         elif withowsm:
 
             # OWSM template in 12.1.3 does not include JRF apps
 
-            if v122:
-                sgrps = ["WSMPM-MAN-SVR"]
-            else:
-                sgrps = ["WSMPM-MAN-SVR", "JRF-MAN-SVR"]
+            sgrps = ["WSMPM-MAN-SVR"] if v122 else ["WSMPM-MAN-SVR", "JRF-MAN-SVR"]
         else:
             sgrps = ["JRF-MAN-SVR"]
 
@@ -550,9 +542,9 @@ def createserver(name, port, listenaddress=None, machine=None, cluster=None, coh
 def servercoherence(name, cohport=0, cohhost=None):
 
     if cohport != 0:
-        cd('/Servers/' + name)
+        cd(f'/Servers/{name}')
         create(name, "CoherenceMemberConfig")
-        cd('CoherenceMemberConfig/' + name)
+        cd(f'CoherenceMemberConfig/{name}')
 
         cmo.setUnicastListenPort(cohport)
 
@@ -568,11 +560,11 @@ def createmachine(name, address='localhost', port=5556):
     cd('/')
 
     create(name, 'Machine')
-    cd('Machines/' + name)
+    cd(f'Machines/{name}')
     result = cmo
 
     create(name, 'NodeManager')
-    cd('NodeManager/' + name)
+    cd(f'NodeManager/{name}')
 
     cmo.setListenAddress(address)
     cmo.setListenPort(port)
@@ -584,11 +576,11 @@ def createmachine(name, address='localhost', port=5556):
 # =====================
 
 def setmachine(server, machine):
-    cd("/Machines/" + machine)
+    cd(f"/Machines/{machine}")
     machbean = cmo
 
-    cd("/Servers/" + server)
-    cmo.setMachine(machbean)    
+    cd(f"/Servers/{server}")
+    cmo.setMachine(machbean)
     cd("/")
 
 # Create startup group
@@ -607,10 +599,10 @@ def modifystartupgroup(name, heap=0, debugport=0, properties=None, environ=None,
     cd('/StartupGroupConfig')
     cd(name)
     result = cmo
-    
+
     if heap != 0:
         set('MaxHeapSize', str(heap))
-        
+
         # Safety check in case heap is being reduced
 
         if heap < int(get("InitialHeapSize")):
@@ -620,7 +612,11 @@ def modifystartupgroup(name, heap=0, debugport=0, properties=None, environ=None,
     setenv = false
 
     if debugport != 0:
-        addjavaopts(env, "-agentlib:jdwp=transport=dt_socket,address=" + str(debugport) + ",server=y,suspend=n")
+        addjavaopts(
+            env,
+            f"-agentlib:jdwp=transport=dt_socket,address={str(debugport)},server=y,suspend=n",
+        )
+
         setenv = true
 
     if javaopts != None:
@@ -640,7 +636,7 @@ def modifystartupgroup(name, heap=0, debugport=0, properties=None, environ=None,
 
         for x in properties:
             props[x] = properties[x]
-        
+
         set("SystemProperties", props)
 
     cd('/')
@@ -650,7 +646,7 @@ def addjavaopts(env, opts):
     if "JAVA_OPTIONS" in env:
         opts = env["JAVA_OPTIONS"] + " " + opts
 
-    if not "%JAVA_OPTIONS%" in opts:
+    if "%JAVA_OPTIONS%" not in opts:
         opts = "%JAVA_OPTIONS%" + " " + opts
 
     env["JAVA_OPTIONS"] = opts
@@ -671,15 +667,15 @@ def addlibrary(path,  target):
     spec  = attrs.getValue("Specification-Version")
     impl  = attrs.getValue("Implementation-Version")
 
-    if impl == None:
+    if impl is None:
         impl = spec
 
-    version = spec + "@" + impl
-    vname   = name + "#" + version
+    version = f"{spec}@{impl}"
+    vname = f"{name}#{version}"
 
     create(vname, "Library")
-    
-    cd("/Library/" + vname)
+
+    cd(f"/Library/{vname}")
     result = cmo
 
     cmo.setModuleType(path[-3:])
@@ -690,7 +686,7 @@ def addlibrary(path,  target):
         cmo.setTargets(target)
     else:
         cmo.setTargets([target])
-    
+
     cd('/')
     return result
 
@@ -807,21 +803,9 @@ def stopadmin():
 
 def setldap(ldapinfo):
 
-    if "type" in ldapinfo:
-        type = ldapinfo["type"]
-    else:
-        type = None
-
-    if "gate" in ldapinfo:
-        gate = ldapinfo["gate"]
-    else:
-        gate = None
-
-    if "ssl" in ldapinfo:
-        ssl = ldapinfo["ssl"]
-    else:
-        ssl = false
-
+    type = ldapinfo["type"] if "type" in ldapinfo else None
+    gate = ldapinfo["gate"] if "gate" in ldapinfo else None
+    ssl = ldapinfo["ssl"] if "ssl" in ldapinfo else false
     configureldap(ldapinfo["name"], type = type, gate = gate, ssl = ssl)
 
 # Create LDAP authenticator + optional OAM, move to top
@@ -901,12 +885,12 @@ def configureldap(name, type = None, gate = None, ssl = false):
 
 def titania(name = 'titania', ssl = false):
     cd('/')
-    base = '/SecurityConfiguration/' + cmo.getName() + '/Realms/myrealm'
+    base = f'/SecurityConfiguration/{cmo.getName()}/Realms/myrealm'
 
     cd(base)
     create(name, 'weblogic.security.providers.authentication.OracleInternetDirectoryAuthenticator', 'AuthenticationProvider')
 
-    cd('AuthenticationProviders/' + name)
+    cd(f'AuthenticationProviders/{name}')
     cmo.setControlFlag('SUFFICIENT')
     cmo.setPrincipal('cn=netuser,cn=users,dc=titania,dc=com')
     cmo.setHost('hostname')
@@ -927,12 +911,12 @@ def titania(name = 'titania', ssl = false):
 
 def oberon(name = 'oberon', ssl = false):
     cd('/')
-    base = '/SecurityConfiguration/' + cmo.getName() + '/Realms/myrealm'
+    base = f'/SecurityConfiguration/{cmo.getName()}/Realms/myrealm'
 
     cd(base)
     create(name, 'weblogic.security.providers.authentication.OracleInternetDirectoryAuthenticator', 'AuthenticationProvider')
 
-    cd('AuthenticationProviders/' + name)
+    cd(f'AuthenticationProviders/{name}')
     cmo.setControlFlag('SUFFICIENT')
     cmo.setPrincipal('cn=netuser,cn=users,dc=oberon,dc=com')
     cmo.setHost('hostname')
@@ -953,12 +937,12 @@ def oberon(name = 'oberon', ssl = false):
 
 def ariel(name = 'ariel', ssl = false):
     cd('/')
-    base = '/SecurityConfiguration/' + cmo.getName() + '/Realms/myrealm'
+    base = f'/SecurityConfiguration/{cmo.getName()}/Realms/myrealm'
 
     cd(base)
     create(name, 'weblogic.security.providers.authentication.OpenLDAPAuthenticator', 'AuthenticationProvider')
 
-    cd('AuthenticationProviders/' + name)
+    cd(f'AuthenticationProviders/{name}')
     cmo.setControlFlag('SUFFICIENT')
     cmo.setPrincipal('cn=netuser,ou=people,dc=ariel,dc=com')
     cmo.setHost('hostname')
@@ -979,12 +963,12 @@ def ariel(name = 'ariel', ssl = false):
 
 def sycorax(name = 'sycorax', ssl = false):
     cd('/')
-    base = '/SecurityConfiguration/' + cmo.getName() + '/Realms/myrealm'
+    base = f'/SecurityConfiguration/{cmo.getName()}/Realms/myrealm'
 
     cd(base)
     create(name, 'weblogic.security.providers.authentication.ActiveDirectoryAuthenticator', 'AuthenticationProvider')
 
-    cd('AuthenticationProviders/' + name)
+    cd(f'AuthenticationProviders/{name}')
     cmo.setControlFlag('SUFFICIENT')
     cmo.setPrincipal('netuser@domain.com')
     cmo.setHost('hostname')
@@ -1055,8 +1039,8 @@ def createaqdest(name, remote):
     cd("/JMSSystemResource/EDQFusionJMS/JmsResource/NO_NAME_0/ForeignServers/EDQFusionJMS")
 
     create(name, "ForeignDestination")
-    cd("ForeignDestination/" + name) 
-    cmo.setLocalJNDIName("jms/" + name)
+    cd(f"ForeignDestination/{name}")
+    cmo.setLocalJNDIName(f"jms/{name}")
     cmo.setRemoteJNDIName(remote)
     cd('/')
 
@@ -1123,10 +1107,7 @@ def currentloc():
     p = pwd()
     x = p.find('/', 1)
 
-    if x < 0:
-        return '/'
-    else:
-        return p[x:]
+    return '/' if x < 0 else p[x:]
 
 # Get a target object
 
@@ -1134,7 +1115,7 @@ def gettarget(name):
     curr = currentloc()
 
     if name.find('/') > 0:
-        name = '/' + name
+        name = f'/{name}'
 
     cd(name)
     target = cmo
@@ -1146,22 +1127,28 @@ def gettarget(name):
 # Note: file: is added to codebase here
 
 def grantcredentialpermission(codebase, map, key="*", actions="read"):
-    grantPermission(codeBaseURL="file:" + codebase,
-                    permClass="oracle.security.jps.service.credstore.CredentialAccessPermission", 
-                    permTarget="context=SYSTEM,mapName=" + map + ",keyName=" + key, 
-                    permActions=actions)
+    grantPermission(
+        codeBaseURL=f"file:{codebase}",
+        permClass="oracle.security.jps.service.credstore.CredentialAccessPermission",
+        permTarget=f"context=SYSTEM,mapName={map},keyName={key}",
+        permActions=actions,
+    )
 
 def grantkeystorepermission(codebase, stripe="edq", keystore="*", alias="*", actions="*"):
-    grantPermission(codeBaseURL="file:" + codebase,
-                    permClass="oracle.security.jps.service.keystore.KeyStoreAccessPermission", 
-                    permTarget="stripeName=" + stripe + ",keystoreName=" + keystore + ",alias=" + alias,
-                    permActions=actions)
+    grantPermission(
+        codeBaseURL=f"file:{codebase}",
+        permClass="oracle.security.jps.service.keystore.KeyStoreAccessPermission",
+        permTarget=f"stripeName={stripe},keystoreName={keystore},alias={alias}",
+        permActions=actions,
+    )
 
 def grantauditpermission(codebase, component="edq", actions="read,write"):
-    grantPermission(codeBaseURL="file:" + codebase,
-                    permClass="oracle.security.jps.service.audit.AuditStoreAccessPermission",
-                    permTarget=component,
-                    permActions=actions)
+    grantPermission(
+        codeBaseURL=f"file:{codebase}",
+        permClass="oracle.security.jps.service.audit.AuditStoreAccessPermission",
+        permTarget=component,
+        permActions=actions,
+    )
 
 # Export kfile to JCEKS key store
 
@@ -1225,15 +1212,14 @@ def idcs(host, port, ssl, clienttenant, clientid, clientsecret):
 # ==========================================
 
 def fixboot(domainloc, prefix, num, weblogicpw):
-    base = domainloc + "/servers/" + prefix
+    base = f"{domainloc}/servers/{prefix}"
 
     for s in range(1, num+1):
         dir = base + str(s) + "/security"
         os.makedirs(dir)
 
-        fd = open(dir + "/boot.properties", "w")
-        fd.writelines(["username = weblogic\n", "password = " + weblogicpw + "\n"])
-        fd.close()
+        with open(f"{dir}/boot.properties", "w") as fd:
+            fd.writelines(["username = weblogic\n", f"password = {weblogicpw}" + "\n"])
 
 # Version number functions
 # ========================
@@ -1255,18 +1241,10 @@ def compver(v1, v2):
     l1 = len(s1)
     l2 = len(s2)
 
-    for i in range(0, max(l1, l2)):
+    for i in range(max(l1, l2)):
 
-        if i >= l1:
-            n1 = 0
-        else:
-            n1 = int(s1[i])
-
-        if i >= l2:
-            n2 = 0
-        else:
-            n2 = int(s2[i])
-
+        n1 = 0 if i >= l1 else int(s1[i])
+        n2 = 0 if i >= l2 else int(s2[i])
         if n1 < n2:
             return -1
         elif n1 > n2:

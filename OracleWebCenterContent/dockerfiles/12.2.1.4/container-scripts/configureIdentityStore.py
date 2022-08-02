@@ -18,16 +18,16 @@ oid_auth_type = sys.argv[6]
 print('Configuring Identity Store');
 print('==========================');
 print('Parameters :');
-print('admin_host  :' +  admin_host );
-print('Configure OID :' + configure_oid);
-print('OID Host :' + oid_host);
-print('OID Port :' + oid_port);
-print('OID PWD  :' + oid_pwd);
-print('OID Auth Type :' + oid_auth_type);
+print(f'admin_host  :{admin_host}');
+print(f'Configure OID :{configure_oid}');
+print(f'OID Host :{oid_host}');
+print(f'OID Port :{oid_port}');
+print(f'OID PWD  :{oid_pwd}');
+print(f'OID Auth Type :{oid_auth_type}');
 print('')
 print('')
 
-url = admin_host + ':' + admin_port
+url = f'{admin_host}:{admin_port}'
 connect(admin_name, admin_pass, url)
 
 edit()
@@ -57,8 +57,8 @@ cmo.setGroupBaseDN('cn=groups,dc=us,dc=oracle,dc=com')
 cmo.setUserBaseDN('cn=users,dc=us,dc=oracle,dc=com')
 
 print('Setting to authenticate by uid...')
-cmo.setAllUsersFilter('(&(' + oid_auth_type +'=*)(objectclass=person))')
-cmo.setUserFromNameFilter('(&('+ oid_auth_type +'=%u)(objectclass=person))')
+cmo.setAllUsersFilter(f'(&({oid_auth_type}=*)(objectclass=person))')
+cmo.setUserFromNameFilter(f'(&({oid_auth_type}=%u)(objectclass=person))')
 cmo.setUserNameAttribute(oid_auth_type)
 cmo.setUseRetrievedUserNameAsPrincipal(true)
 

@@ -23,7 +23,7 @@ from multiprocessing.connection import Listener, Client
 
 # Multiprocess communication auth key
 AUTHKEY = 'vkidSQkgAHc='
-DIR_LOCK_FILE = os.sep + '.dirlock'
+DIR_LOCK_FILE = f'{os.sep}.dirlock'
 
 def acquire_lock(lock_file, sock_file, block, heartbeat):
     """
@@ -37,13 +37,15 @@ def acquire_lock(lock_file, sock_file, block, heartbeat):
     # create an empty lock file first
     open(lock_file, 'a').close()
     lock_handle = open(lock_file)
-    print('[%s]: Acquiring lock %s with heartbeat %s secs' %
-         (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(lock_file), heartbeat))
+    print(
+        f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Acquiring lock {os.path.basename(lock_file)} with heartbeat {heartbeat} secs"
+    )
+
     while True:
         try:
             fcntl.flock(lock_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            print('[%s]: Lock acquired' % (time.strftime('%Y:%m:%d %H:%M:%S')))
-            print('[%s]: Starting heartbeat' % (time.strftime('%Y:%m:%d %H:%M:%S')))
+            print(f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Lock acquired")
+            print(f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Starting heartbeat")
             os.utime(lock_file, None)
             break
         except IOError as e:
@@ -57,60 +59,73 @@ def acquire_lock(lock_file, sock_file, block, heartbeat):
             pulse = int(time.time() - os.path.getmtime(lock_file))
             if heartbeat < pulse:
                 # something is wrong
-                print('[%s]: Lost heartbeat by %s secs' % (time.strftime('%Y:%m:%d %H:%M:%S'), pulse))
+                print(
+                    f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Lost heartbeat by {pulse} secs"
+                )
+
                 lock_handle.close()
                 # get dir lock
                 with open(os.path.dirname(lock_file) + DIR_LOCK_FILE, 'w') as dir_lh:
                     fcntl.flock(dir_lh, fcntl.LOCK_EX)
                     # pulse check again after acquring dir lock
                     if heartbeat < int(time.time() - os.path.getmtime(lock_file)):
-                        print('[%s]: Recreating %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(lock_file)))
+                        print(
+                            f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Recreating {os.path.basename(lock_file)}"
+                        )
+
                         os.remove(lock_file)
                         open(lock_file, 'w').close()
 
                 lock_handle = open(lock_file)
-                print('[%s]: Reacquiring lock %s' %
-                     (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(lock_file)))
+                print(
+                    f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Reacquiring lock {os.path.basename(lock_file)}"
+                )
+
 
 
     if os.fork():
         return 0
-    else:
-        # Spawn a child process to hold on to the lock
-        if os.path.exists(sock_file):
-            os.remove(sock_file)
-        print('[%s]: Lock held %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(lock_file)))
-        listener = Listener(address=sock_file, authkey=AUTHKEY)
+    # Spawn a child process to hold on to the lock
+    if os.path.exists(sock_file):
+        os.remove(sock_file)
+    print(
+        f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Lock held {os.path.basename(lock_file)}"
+    )
 
-        def listen():
-            while True:
-                conn = listener.accept()
-                if conn.recv():
-                    break
-            release()
+    listener = Listener(address=sock_file, authkey=AUTHKEY)
 
-        def release(sig=None, frame=None):
-            """
+    def listen():
+        while True:
+            conn = listener.accept()
+            if conn.recv():
+                break
+        release()
+
+    def release(sig=None, frame=None):
+        """
             Release if the process is stopped/terminated
             :param sig:
             :param frame:
             :return:
             """
-            # Hold on to the lock for other container
-            # processes to terminate first. Allow 30 secs timeout
-            if sig:	    
-                time.sleep(30)
-            lock_handle.close()
-            listener.close()
-            print('[%s]: Lock released %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(lock_file)))
+        # Hold on to the lock for other container
+        # processes to terminate first. Allow 30 secs timeout
+        if sig:	    
+            time.sleep(30)
+        lock_handle.close()
+        listener.close()
+        print(
+            f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Lock released {os.path.basename(lock_file)}"
+        )
 
-        signal.signal(signal.SIGTERM, release)
-        signal.signal(signal.SIGINT, release)
-        threading.Thread(target=listen).start()
 
-        while not lock_handle.closed:
-            os.utime(lock_file, None)
-            time.sleep(5)
+    signal.signal(signal.SIGTERM, release)
+    signal.signal(signal.SIGINT, release)
+    threading.Thread(target=listen).start()
+
+    while not lock_handle.closed:
+        os.utime(lock_file, None)
+        time.sleep(5)
 
 
 def check_lock(sock_file):
@@ -121,11 +136,17 @@ def check_lock(sock_file):
     """
     if not os.path.exists(sock_file):
         return 1
-    print('[%s]: Connecting to the lock process %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), sock_file))
+    print(
+        f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Connecting to the lock process {sock_file}"
+    )
+
     cl = Client(address=sock_file, authkey=AUTHKEY)
     cl.send(False)
     cl.close()
-    print('[%s]: Lock held %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(sock_file)))
+    print(
+        f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Lock held {os.path.basename(sock_file)}"
+    )
+
     return 0
 
 
@@ -137,7 +158,10 @@ def release_lock(sock_file):
     """
     if not os.path.exists(sock_file):
         return 1
-    print('[%s]: Releasing lock %s' % (time.strftime('%Y:%m:%d %H:%M:%S'), os.path.basename(sock_file)))
+    print(
+        f"[{time.strftime('%Y:%m:%d %H:%M:%S')}]: Releasing lock {os.path.basename(sock_file)}"
+    )
+
     cl = Client(address=sock_file, authkey=AUTHKEY)
     cl.send(True)
     cl.close()

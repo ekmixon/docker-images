@@ -11,14 +11,14 @@ domain_name  = os.environ.get("DOMAIN_NAME", "base_domain")
 admin_port   = int(os.environ.get("ADMIN_PORT", "7001"))
 admin_pass   = os.environ.get("ADMIN_PASSWORD")
 cluster_name = os.environ.get("CLUSTER_NAME", "DockerCluster")
-domain_path  = '/u01/oracle/user_projects/domains/%s' % domain_name
+domain_path = f'/u01/oracle/user_projects/domains/{domain_name}'
 production_mode = 'dev'
 
-print('domain_name : [%s]' % domain_name);
-print('admin_port  : [%s]' % admin_port);
-print('cluster_name: [%s]' % cluster_name);
-print('domain_path : [%s]' % domain_path);
-print('production_mode : [%s]' % production_mode);
+print(f'domain_name : [{domain_name}]');
+print(f'admin_port  : [{admin_port}]');
+print(f'cluster_name: [{cluster_name}]');
+print(f'domain_path : [{domain_path}]');
+print(f'production_mode : [{production_mode}]');
 
 # Open default domain template
 # ======================
@@ -39,7 +39,7 @@ set('ListenPort', admin_port)
 
 # Define the user password for weblogic
 # =====================================
-cd('/Security/%s/User/weblogic' % domain_name)
+cd(f'/Security/{domain_name}/User/weblogic')
 cmo.setPassword(admin_pass)
 
 # Write the domain and close the domain template
@@ -66,7 +66,7 @@ set('NodeManagerPasswordEncrypted', admin_pass)
 cd('/')
 create(cluster_name, 'Cluster')
 
-cd('/Clusters/%s' % cluster_name)
+cd(f'/Clusters/{cluster_name}')
 cmo.setClusterMessagingMode('unicast')
 
 # Write Domain

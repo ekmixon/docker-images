@@ -141,11 +141,14 @@ class SOA12214Provisioner:
     def createDomain(self, name, user, password, db, dbPrefix, dbPassword, domainType):
         domainHome = self.createBaseDomain(name, user, password, domainType)
 
-        if domainType == "soa" or domainType == "soaosb":
-                self.extendSoaDomain(domainHome, db, dbPrefix, dbPassword)
+        if domainType in ["soa", "soaosb"]:
+            self.extendSoaDomain(domainHome, db, dbPrefix, dbPassword)
 
-        if domainType == "soab2b" or domainType == "soaosbb2b":
-                self.extendSoaB2BDomain(domainHome, db, dbPrefix, dbPassword)
+        if domainType in ["soab2b", "soaosbb2b"]:
+            self.extendSoaB2BDomain(domainHome, db, dbPrefix, dbPassword)
+
+        if domainType in ["osb", "soaosb", "soaosbb2b"]:
+            self.extendOsbDomain(domainHome, db, dbPrefix, dbPassword, domainType)
 
         if domainType == "osb" or domainType == "soaosb" or domainType == "soaosbb2b":
                 self.extendOsbDomain(domainHome, db, dbPrefix, dbPassword, domainType)
@@ -153,23 +156,22 @@ class SOA12214Provisioner:
         if persistentStore == 'jdbc':
             self.configureTlogJDBCStore(domainHome, domainType)
             self.reConfigureJMSStore(domainHome, domainType)
-        else:
-            print 'persistentStore = '+persistentStore+'...skipping JDBC reconfig'
 
     def configureTlogJDBCStore(self, domainHome, domainType):
         readDomain(domainHome)
-        print 'START Configuring TLog JDBC Persistent Store'
+        readDomain(domainHome)
         try:
             ## Get the schema information for 'WLSSchemaDataSource'
             schemaPrefix = self.getDSSchemaPrefix ('WLSSchemaDataSource')
             serverList = ['AdminServer']
-            if domainType == "soa" or domainType == "soaosb" or domainType == "soab2b" or domainType == "soaosbb2b":
+            if domainType in ["soa", "soaosb", "soab2b", "soaosbb2b"]:
                 serverList.extend(list(self.SOA_SERVERS.keys()))
-            if domainType == "osb" or domainType == "soaosb" or domainType == "soaosbb2b":
+            if domainType in ["osb", "soaosb", "soaosbb2b"]:
                 serverList.extend(list(self.OSB_SERVERS.keys()))
-            print serverList
+            ## Get the schema information for 'WLSSchemaDataSource'
+            schemaPrefix = self.getDSSchemaPrefix ('WLSSchemaDataSource')
             for server in serverList:
-                self.setTlogJDBCStoreAttributes(server, schemaPrefix) 
+                self.setTlogJDBCStoreAttributes(server, schemaPrefix)
         except:
             raise
         updateDomain()
@@ -385,29 +387,31 @@ class SOA12214Provisioner:
                 return Boolean('true');
         return Boolean('false');
 
-    def cleanunUsedSOAStores (self):
+    def cleanunUsedSOAStores(self):
         cd('/')
         ## list of eligible SOA JMS Store to cleanup, if they are not in use
         soacleanJDBCStoresList  = [] #['AGJMSJDBCStore','PS6SOAJMSJDBCStore','BPMJMSJDBCStore']
-        soacleanFileStoresList  = ['SOAJMSFileStore']      
+        soacleanFileStoresList  = ['SOAJMSFileStore']
         configUpdated = false
         for fileStore in cmo.getFileStores():
             for soaStore in soacleanFileStoresList:
-                if fileStore.getName().find(soaStore) != -1:
-                    if (self.isDeletableFileStore(fileStore.getName()) == Boolean(true)) :
-                        delete(fileStore.getName(),'FileStore')
-                        print time.asctime(time.localtime(time.time())) + ' : Deleted FileStore '+fileStore.getName() 
-                        configUpdated = true
+                if fileStore.getName().find(soaStore) != -1 and (
+                    self.isDeletableFileStore(fileStore.getName()) == Boolean(true)
+                ):
+                    delete(fileStore.getName(),'FileStore')
+                    delete(fileStore.getName(),'FileStore')
+                    configUpdated = true
 
         for jdbcStore in cmo.getJDBCStores():
             for soaStore in soacleanJDBCStoresList:
-                if jdbcStore.getName().find(soaStore) != -1:
-                    if (self.isDeletableJDBCStore(jdbcStore.getName()) == Boolean(true)) :
-                        delete(jdbcStore.getName(),'JDBCStore')
-                        print time.asctime(time.localtime(time.time())) + ' : Deleted JDBCStore '+jdbcStore.getName() 
-                        configUpdated = true
-    
-        print time.asctime(time.localtime(time.time())) + ' : END cleanunUsedSOAStores configUpdated '+str(Boolean(configUpdated))
+                if jdbcStore.getName().find(soaStore) != -1 and (
+                    self.isDeletableJDBCStore(jdbcStore.getName()) == Boolean(true)
+                ):
+                    delete(jdbcStore.getName(),'JDBCStore')
+                    delete(jdbcStore.getName(),'JDBCStore')
+                    configUpdated = true
+
+        cd('/')
         return configUpdated
 
     def getTargetMbean (self, targetName):
@@ -429,8 +433,12 @@ class SOA12214Provisioner:
         return text
 
     def checkServerInCluster(self, serverName, serverList):
-        if serverName == None or len(serverName) < 1:
-            print (Time.asctime(Time.localtime(Time.time())) +' : Server Target not valid. ', str(serverName))
+        if serverName is None or len(serverName) < 1:
+            print(
+                f'{Time.asctime(Time.localtime(Time.time()))} : Server Target not valid. ',
+                serverName,
+            )
+
             return false
 
         for item in serverList:
@@ -472,7 +480,7 @@ class SOA12214Provisioner:
 
     def getDSMBean(self, jdbcDS):
         try:
-            cd ('/JDBCSystemResources/'+jdbcDS)
+            cd(f'/JDBCSystemResources/{jdbcDS}')
             return cmo
         except:
             raise Exception ('Exception on getting data source')
@@ -617,10 +625,10 @@ class SOA12214Provisioner:
 
     def targetSOAServers(self,serverGroupsToTarget):
         for server in self.SOA_SERVERS:
-            if not server == 'AdminServer':
+            if server != 'AdminServer':
                 setServerGroups(server, serverGroupsToTarget)
-                print "INFO: Set CoherenceClusterSystemResource to defaultCoherenceCluster for server:" + server
-                cd('/Servers/' + server)
+                setServerGroups(server, serverGroupsToTarget)
+                cd(f'/Servers/{server}')
                 set('CoherenceClusterSystemResource', 'defaultCoherenceCluster')
         return
 
@@ -633,10 +641,10 @@ class SOA12214Provisioner:
 
     def targetOSBServers(self,serverGroupsToTarget):
         for server in self.OSB_SERVERS:
-            if not server == 'AdminServer':
+            if server != 'AdminServer':
                 setServerGroups(server, serverGroupsToTarget)
-                print "INFO: Set CoherenceClusterSystemResource to defaultCoherenceCluster for server:" + server
-                cd('/Servers/' + server)
+                setServerGroups(server, serverGroupsToTarget)
+                cd(f'/Servers/{server}')
                 set('CoherenceClusterSystemResource', 'defaultCoherenceCluster')
         return
 
@@ -774,10 +782,10 @@ class SOA12214Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 

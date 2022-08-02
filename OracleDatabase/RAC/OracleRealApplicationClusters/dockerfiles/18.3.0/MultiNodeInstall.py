@@ -54,8 +54,8 @@ def Update_Envfile(common_params):
         if keys == 'domain':
            domain = common_params[keys]
 
-        env_var_str = "export " + keys.upper() + "=" + common_params[keys]
-        Redirect_To_File("Env vars for RAC Env set to " + env_var_str, "INFO")
+        env_var_str = f"export {keys.upper()}={common_params[keys]}"
+        Redirect_To_File(f"Env vars for RAC Env set to {env_var_str}", "INFO")
         filedata1 = filedata1 + "\n" + env_var_str
 
     Write_To_File(filedata1,racenvfile)
@@ -202,19 +202,15 @@ def Update_Hostfile(node_list):
 
 
 def Write_To_File(text,filename):
-    f = open(filename,'w')
-    f.write(text)
-    f.close()
+    with open(filename,'w') as f:
+        f.write(text)
 
 def Setup_Operation(op_type):
-    if op_type == 'installrac':
-       cmd="sudo /opt/scripts/startup/runOracle.sh"
-
-    if op_type == 'addnode':
-       cmd="sudo /opt/scripts/startup/runOracle.sh"
-
     if op_type == 'delnode':
-       cmd="sudo /opt/scripts/startup/DelNode.sh"
+        cmd="sudo /opt/scripts/startup/DelNode.sh"
+
+    elif op_type in ['installrac', 'addnode']:
+        cmd="sudo /opt/scripts/startup/runOracle.sh"
 
     output,retcode=Execute_Single_Command(cmd,'None','')
     if retcode != 0:
@@ -246,8 +242,8 @@ def Redirect_To_File(text,level):
        formatter = logging.Formatter('%(asctime)s :%(message)s', "%Y-%m-%d %T %Z")
        ch.setFormatter(formatter)
        root.addHandler(ch)
-    message = os.path.basename(__file__) + " : " + text
-    root.info(' %s ' % message )
+    message = f"{os.path.basename(__file__)} : {text}"
+    root.info(f' {message} ')
     sys.stdout = original
 
 

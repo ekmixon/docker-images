@@ -11,9 +11,12 @@ import os
 # Deployment Information
 domainname = os.environ.get('DOMAIN_NAME', 'base_domain')
 admin_name = os.environ.get('ADMIN_NAME', 'AdminServer')
-domainhome = os.environ.get('DOMAIN_HOME', '/u01/oracle/user_projects/domains/' + domainname)
+domainhome = os.environ.get(
+    'DOMAIN_HOME', f'/u01/oracle/user_projects/domains/{domainname}'
+)
 
-print('admin_name  : [%s]' % admin_name);
+
+print(f'admin_name  : [{admin_name}]');
 
 # Read Domain in Offline Mode
 # ===========================
@@ -36,11 +39,11 @@ assign('FileStore', 'DockerFileStore', 'Target', admin_name)
 # ===================
 cd('/')
 jmsserver=create('DockerJMSServer', 'JMSServer')
-print('Create JMSServer : [%s]' % 'DockerJMSServer')
+print('Create JMSServer : [DockerJMSServer]')
 
 cd('/JMSServers/DockerJMSServer')
 set('PersistentStore', 'DockerFileStore')
-print('FileStore_name     : [%s]' % getMBean('/FileStores/DockerFileStore'))
+print(f"FileStore_name     : [{getMBean('/FileStores/DockerFileStore')}]")
 
 cd('/')
 assign('JMSServer', 'DockerJMSServer', 'Target', admin_name)

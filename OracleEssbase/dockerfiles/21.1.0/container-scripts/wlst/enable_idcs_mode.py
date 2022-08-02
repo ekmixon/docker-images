@@ -11,9 +11,7 @@ import sys
 import shutil
 
 def noneIfNoValue(v):
-   if v is None or v == 'NO_VALUE':
-      return None
-   return v
+   return None if v is None or v == 'NO_VALUE' else v
 
 try:
    if len(sys.argv) < 8:

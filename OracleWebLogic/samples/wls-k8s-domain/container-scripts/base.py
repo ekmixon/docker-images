@@ -16,7 +16,7 @@ from collections import OrderedDict
 import os
 
 adminPort=os.environ["ADMIN_PORT"]
-prefix='http://localhost:' + adminPort + '/management/weblogic/latest/'
+prefix = f'http://localhost:{adminPort}/management/weblogic/latest/'
 domainDir=os.environ["SAMPLE_DOMAIN_HOME"]
 jmsFileName="mymodule-jms.xml"
 jdbcFileName="ds1-jdbc.xml"
@@ -65,7 +65,7 @@ def waitAdmin():
 
 def cpJMSResource(modulefile):
     print("cpJMSResource", modulefile)
-    destdir=domainDir+'/config/jms/'
+    destdir = f'{domainDir}/config/jms/'
     try:
         os.makedirs(destdir)
     except OSError:
@@ -77,7 +77,7 @@ def cpJMSResource(modulefile):
 
 def cpJDBCResource(modulefile):
     print("cpJDBCResource", modulefile)
-    destdir=domainDir+'/config/jdbc/'
+    destdir = f'{domainDir}/config/jdbc/'
     try:
         os.makedirs(destdir)
     except OSError:
@@ -91,8 +91,15 @@ def createOne(name, tail, data):
     #print("create", name, tail, data)
     jData = json.dumps(data, ensure_ascii=False)
     print(jData)
-    myResponse = requests.post(prefix+"edit/"+tail, auth=auth, headers=header1, data=jData, verify=True)
-    result(myResponse, 'create ' + name, 'true')
+    myResponse = requests.post(
+        f"{prefix}edit/{tail}",
+        auth=auth,
+        headers=header1,
+        data=jData,
+        verify=True,
+    )
+
+    result(myResponse, f'create {name}', 'true')
 
 def createAll(inputfile):
     jdata = json.loads(open(inputfile, 'r').read(), object_pairs_hook=OrderedDict)

@@ -21,30 +21,30 @@ nodeName = os.environ.get("NODE_NAME")
 
 
 esHost = sys.argv[1]
-searchUrl = 'http://' + esHost + ':9200'
+searchUrl = f'http://{esHost}:9200'
 
 print('')
 print('Creating Search Connection');
 print('=====================================');
 print('Parameters:');
-print('Connection Name: ' + searchConnName);
-print('Search URL: ' + searchUrl);
-print('Search App User Name: ' + searchUserName);
-print('Search Index Alias Name: ' + indexAliasName);
+print(f'Connection Name: {searchConnName}');
+print(f'Search URL: {searchUrl}');
+print(f'Search App User Name: {searchUserName}');
+print(f'Search Index Alias Name: {indexAliasName}');
 print('')
 
-url = adminHost + ":" + adminPort
+url = f"{adminHost}:{adminPort}"
 connect(adminName, adminPassword, url)
 
 if (nodeName == 'es-statefulset-0'):
- searchUrl = 'http://' + loadBalancerIP + ':9200'
- print('Search URL: ' + searchUrl);
+ searchUrl = f'http://{loadBalancerIP}:9200'
+ print(f'Search URL: {searchUrl}');
  createSearchConnection(appName='webcenter', name=searchConnName, url=searchUrl, indexAliasName=indexAliasName, appUser=searchUserName, appPassword=searchUserPwd, server='wcpserver1')
  listSearchConnections(appName='webcenter', verbose=true, server='wcpserver1')
 
 else:
-  createSearchConnection(appName='webcenter', name=searchConnName, url=searchUrl, indexAliasName=indexAliasName, appUser=searchUserName, appPassword=searchUserPwd)
-  listSearchConnections(appName='webcenter', verbose=true)
- 
+ createSearchConnection(appName='webcenter', name=searchConnName, url=searchUrl, indexAliasName=indexAliasName, appUser=searchUserName, appPassword=searchUserPwd)
+ listSearchConnections(appName='webcenter', verbose=true)
+
 disconnect()
 exit()

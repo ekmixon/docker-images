@@ -22,7 +22,7 @@ readDomain(domainhome)
 # ==================
 cd('/')
 app = create(appname, 'AppDeployment')
-app.setSourcePath(appdir + '/' + apppkg)
+app.setSourcePath(f'{appdir}/{apppkg}')
 app.setStagingMode('nostage')
 
 # Assign application to AdminServer

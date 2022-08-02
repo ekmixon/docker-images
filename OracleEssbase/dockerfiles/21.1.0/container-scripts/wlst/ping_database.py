@@ -12,9 +12,7 @@ from java.util import Properties
 from java.sql  import DriverManager
 
 def noneIfNoValue(v):
-   if v is None or v == 'NO_VALUE':
-      return None
-   return v
+   return None if v is None or v == 'NO_VALUE' else v
 
 try:
    if len(sys.argv) < 4:

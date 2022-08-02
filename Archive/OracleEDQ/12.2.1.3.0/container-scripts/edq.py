@@ -173,7 +173,7 @@ def fixstart(loc, servers, weblogicpw):
     # Server startup
 
     for s in range(1, servers+1):
-        dir = loc + "/servers/edq_server" + str(s) + "/security"
+        dir = f"{loc}/servers/edq_server{str(s)}/security"
 
         # Directory may already exist
 
@@ -182,6 +182,5 @@ def fixstart(loc, servers, weblogicpw):
         except:
             pass
 
-        fd = open(dir + "/boot.properties", "w")
-        fd.writelines(["username = weblogic\n", "password = " + weblogicpw + "\n"])
-        fd.close()
+        with open(f"{dir}/boot.properties", "w") as fd:
+            fd.writelines(["username = weblogic\n", f"password = {weblogicpw}" + "\n"])

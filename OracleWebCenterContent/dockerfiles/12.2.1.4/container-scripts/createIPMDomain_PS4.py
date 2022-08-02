@@ -47,7 +47,7 @@ class IPM12214Provisioner:
         return
 
     def createIPMDomain(self, name, user, password, db, dbPrefix, dbPassword):
-        self.extendDomain(self.domainParentDir + '/' + name, db, dbPrefix, dbPassword)
+        self.extendDomain(f'{self.domainParentDir}/{name}', db, dbPrefix, dbPassword)
 
 
     def extendDomain(self, domainHome, db, dbPrefix, dbPassword):
@@ -130,10 +130,10 @@ class IPM12214Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 

@@ -11,7 +11,7 @@ admin_password = os.environ.get('ADMIN_PASSWORD') # this is read only once when 
 admin_host     = os.environ.get('ADMIN_HOST', 'wlsadmin')
 admin_port     = os.environ.get('ADMIN_PORT', '7001')
 # Node Manager Vars
-nmname         = os.environ.get('NM_NAME', 'Machine-' + hostname)
+nmname = os.environ.get('NM_NAME', f'Machine-{hostname}')
 
 # Functions
 def editMode():
@@ -23,4 +23,4 @@ def saveActivate():
     activate(block="true")
 
 def connectToAdmin():
-    connect(url='t3://' + admin_host + ':' + admin_port, adminServerName='AdminServer')
+    connect(url=f't3://{admin_host}:{admin_port}', adminServerName='AdminServer')

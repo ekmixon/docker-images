@@ -15,16 +15,16 @@ admin_name  = os.environ.get("ADMIN_NAME", "AdminServer")
 admin_username  = os.environ.get("ADMIN_USERNAME", "weblogic")
 admin_pass  = os.environ.get("ADMIN_PASSWORD", "welcome1")
 admin_port   = int(os.environ.get("ADMIN_PORT", "7001"))
-domain_path  = '/u01/oracle/user_projects/domains/%s' % domain_name
+domain_path = f'/u01/oracle/user_projects/domains/{domain_name}'
 production_mode = os.environ.get("PRODUCTION_MODE", "prod")
 
-print('domain_name     : [%s]' % domain_name);
-print('admin_port      : [%s]' % admin_port);
-print('domain_path     : [%s]' % domain_path);
-print('production_mode : [%s]' % production_mode);
-print('admin password  : [%s]' % admin_pass);
-print('admin name      : [%s]' % admin_name);
-print('admin username  : [%s]' % admin_username);
+print(f'domain_name     : [{domain_name}]');
+print(f'admin_port      : [{admin_port}]');
+print(f'domain_path     : [{domain_path}]');
+print(f'production_mode : [{production_mode}]');
+print(f'admin password  : [{admin_pass}]');
+print(f'admin name      : [{admin_name}]');
+print(f'admin username  : [{admin_username}]');
 
 # Open default domain template
 # ======================
@@ -46,7 +46,7 @@ set('ListenPort', admin_port)
 
 # Define the user password for weblogic
 # =====================================
-cd('/Security/%s/User/weblogic' % domain_name)
+cd(f'/Security/{domain_name}/User/weblogic')
 cmo.setPassword(admin_pass)
 
 # Write the domain and close the domain template

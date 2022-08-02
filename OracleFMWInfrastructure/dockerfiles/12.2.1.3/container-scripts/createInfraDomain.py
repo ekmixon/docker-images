@@ -61,9 +61,8 @@ class Infra12213Provisioner:
            set('AdministrationPort', int(administrationPort))
            set('AdministrationPortEnabled', 'true')
 
-        # Create Admin Server
-        # =======================
-        print 'Creating Admin Server...'
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         cd('/Servers/AdminServer')
         #set('ListenAddress', '%s-%s' % (domain_uid, admin_server_name_svc))
         set('ListenPort', int(adminListenPort))
@@ -75,55 +74,54 @@ class Infra12213Provisioner:
 
         # Define the user password for weblogic
         # =====================================
-        cd('/Security/' + domainName + '/User/weblogic')
+        cd(f'/Security/{domainName}/User/weblogic')
         set('Name', user)
         set('Password', password)
 
-        # Create  Cluster
-        # =======================
-        print 'Creating cluster...'
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         for cluster in self.CLUSTERS:
             cd('/')
             create(cluster, 'Cluster')
-            cd('Cluster/' + cluster)
+            cd(f'Cluster/{cluster}')
             for param in  self.CLUSTERS[cluster]:
                 set(param, self.CLUSTERS[cluster][param])
 
-        # Create Node Manager
-        # =======================
-        print 'Creating Node Managers...'
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         for machine in self.MACHINES:
             cd('/')
             create(machine, 'Machine')
-            cd('Machine/' + machine)
+            cd(f'Machine/{machine}')
             create(machine, 'NodeManager')
-            cd('NodeManager/' + machine)
+            cd(f'NodeManager/{machine}')
             for param in self.MACHINES[machine]:
                 set(param, self.MACHINES[machine][param])
 
 
-        # Create Managed Server
-        # =======================
-        print 'Creating Managed Server...'
-        cd('/')  
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
+        cd('/')
         create(managedName, 'Server')
-        cd('/Servers/%s/' % managedName )
-        print('managed server name is %s' % managedName);
+        cd(f'/Servers/{managedName}/')
+        print(f'managed server name is {managedName}');
         #   set('ListenAddress', '%s-%s' % (domain_uid, name_svc))
         set('ListenPort', int(managedServerPort))
         set('Cluster', 'infra_cluster')
         if adminPortEnabled != "false":
-           create(managedName,'SSL')
-           cd('SSL/%s' % managedName)
-           set('Enabled', 'True')
+            create(managedName,'SSL')
+            cd(f'SSL/{managedName}')
+            set('Enabled', 'True')
 
         setOption('OverwriteDomain', 'true')
-        domainHome = self.domainParentDir + '/' + name
+        domainHome = f'{self.domainParentDir}/{name}'
 
-        print 'Writing base domain...'
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         writeDomain(domainHome)
         closeTemplate()
-        print 'Base domain created at ' + domainHome
+        baseTemplate = self.replaceTokens(self.JRF_12213_TEMPLATES['baseTemplate'])
+
         return domainHome
 
 
@@ -190,10 +188,10 @@ class Infra12213Provisioner:
             if create:
                 os.makedirs(directory)
             else:
-                message = 'Directory ' + directory + ' does not exist'
+                message = f'Directory {directory} does not exist'
                 raise WLSTException(message)
         elif not os.path.isdir(directory):
-            message = 'Directory ' + directory + ' is not a directory'
+            message = f'Directory {directory} is not a directory'
             raise WLSTException(message)
         return self.fixupPath(directory)
 

@@ -38,7 +38,7 @@ readDomain(domain_path)
 # Set listen address
 # ==================
 cd('/')
-cd('/Server/'+server)
+cd(f'/Server/{server}')
 cmo.setListenAddress(manserver_host)
 cmo.setExternalDNSName(exthost)
 

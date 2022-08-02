@@ -54,8 +54,8 @@ def Update_Envfile(common_params):
         if keys == 'domain':
            domain = common_params[keys]
 
-        env_var_str = "export " + keys.upper() + "=" + common_params[keys]
-        Redirect_To_File("Env vars for RAC Env set to " + env_var_str, "INFO")
+        env_var_str = f"export {keys.upper()}={common_params[keys]}"
+        Redirect_To_File(f"Env vars for RAC Env set to {env_var_str}", "INFO")
         filedata1 = filedata1 + "\n" + env_var_str
 
     Write_To_File(filedata1,racenvfile)

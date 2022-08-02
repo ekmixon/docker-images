@@ -10,7 +10,10 @@ import os
 
 # Deployment Information
 domainname = os.environ.get('DOMAIN_NAME', 'base_domain')
-domainhome = os.environ.get('DOMAIN_HOME', '/u01/oracle/user_projects/domains/' + domainname)
+domainhome = os.environ.get(
+    'DOMAIN_HOME', f'/u01/oracle/user_projects/domains/{domainname}'
+)
+
 cluster_name = os.environ.get("CLUSTER_NAME", "DockerCluster")
 admin_name = os.environ.get("ADMIN_NAME", "AdminServer")
 
@@ -21,16 +24,16 @@ readDomain(domainhome)
 # Create Datasource
 # ==================
 create(dsname, 'JDBCSystemResource')
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 cmo.setName(dsname)
 
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 create('myJdbcDataSourceParams','JDBCDataSourceParams')
 cd('JDBCDataSourceParams/NO_NAME_0')
 set('JNDIName', java.lang.String(dsjndiname))
 set('GlobalTransactionsProtocol', java.lang.String('None'))
 
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 create('myJdbcDriverParams','JDBCDriverParams')
 cd('JDBCDriverParams/NO_NAME_0')
 set('DriverName', dsdriver)
@@ -38,7 +41,8 @@ set('URL', dsurl)
 set('PasswordEncrypted', dspassword)
 set('UseXADataSourceInterface', 'false')
 
-print 'create JDBCDriverParams Properties'
+import os
+
 create('myProperties','Properties')
 cd('Properties/NO_NAME_0')
 create('user','Property')
@@ -50,8 +54,9 @@ create('databaseName','Property')
 cd('Property/databaseName')
 set('Value', dsdbname)
 
-print 'create JDBCConnectionPoolParams'
-cd('/JDBCSystemResource/' + dsname + '/JdbcResource/' + dsname)
+import os
+
+cd(f'/JDBCSystemResource/{dsname}/JdbcResource/{dsname}')
 create('myJdbcConnectionPoolParams','JDBCConnectionPoolParams')
 cd('JDBCConnectionPoolParams/NO_NAME_0')
 set('TestTableName','SQL SELECT 1 FROM DUAL')

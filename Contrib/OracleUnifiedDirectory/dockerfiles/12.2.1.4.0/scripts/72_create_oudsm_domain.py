@@ -22,19 +22,19 @@ import os
 
 # define environment variables
 domain_name      = os.environ.get('DOMAIN_NAME', "oudsm_domain")
-domain_path      = os.environ.get('DOMAIN_HOME', "/u01/domains/%s" % domain_name)
+domain_path = os.environ.get('DOMAIN_HOME', f"/u01/domains/{domain_name}")
 admin_port       = int(os.environ.get('PORT', "7001"))
 admin_sslport    = int(os.environ.get('PORT_SSL', "7002"))
 admin_user       = os.environ.get('ADMIN_USER', "weblogic")
 admin_pass       = "ADMIN_PASSWORD"
 
 
-print('Domain Name     : [%s]' % domain_name)
-print('Domain Path     : [%s]' % domain_path)
-print('Admin Port      : [%s]' % admin_port)
-print('Admin SSL Port  : [%s]' % admin_sslport)
-print('User            : [%s]' % admin_user)
-print('Password        : [%s]' % admin_pass)
+print(f'Domain Name     : [{domain_name}]')
+print(f'Domain Path     : [{domain_path}]')
+print(f'Admin Port      : [{admin_port}]')
+print(f'Admin SSL Port  : [{admin_sslport}]')
+print(f'User            : [{admin_user}]')
+print(f'Password        : [{admin_pass}]')
 
 # create WLS Domain
 createOUDSMDomain(domainLocation        = domain_path,

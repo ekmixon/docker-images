@@ -12,7 +12,7 @@ admin_pass  = os.environ['ADMIN_PASSWORD']
 admin_port  = os.environ['ADMIN_PORT']
 hostname    = sys.argv[1]
 vol_name    = sys.argv[2]
-url         = hostname + ':' + admin_port
+url = f'{hostname}:{admin_port}'
 
 print('')
 print('Configuring Node Manager');
@@ -22,8 +22,8 @@ print('')
 
 # Setting domain path
 # ===================
-domain_path  = domain_root + '/' + domain_name
-nodemanager_path = '/' + vol_name + '/oracle/wlserver/common/nodemanager'
+domain_path = f'{domain_root}/{domain_name}'
+nodemanager_path = f'/{vol_name}/oracle/wlserver/common/nodemanager'
 
 # Read domain for updates
 # =======================

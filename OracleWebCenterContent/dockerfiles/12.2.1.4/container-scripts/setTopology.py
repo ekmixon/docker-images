@@ -12,9 +12,9 @@ admin_port = os.environ['ADMIN_PORT']
 admin_container  = os.environ['ADMIN_SERVER_CONTAINER_NAME']
 admin_host = sys.argv[1]
 
-url = admin_container + ':' + admin_port
+url = f'{admin_container}:{admin_port}'
 
-print('url :' + url);
+print(f'url :{url}');
 
 connect(admin_name, admin_pass, url)
 

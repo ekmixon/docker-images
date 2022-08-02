@@ -15,14 +15,14 @@ soaurl=sys.argv[5]
 umsurl=sys.argv[6]
 
 #This has to be the t3 url of oim admin server
-WLS_T3_URL='t3://' + mbsurl
+WLS_T3_URL = f't3://{mbsurl}'
 #oim frontend url
-OIM_FE_URL='http://' + oimurl
+OIM_FE_URL = f'http://{oimurl}'
 #oim external frontend url
-OIM_EXT_FE_URL='http://' + oimurl
-SOA_FRONTEND_URL='http://' + soaurl
-SOA_T3_URL='t3://' + soaurl
-UMS_URL='http://' + umsurl + '/ucs/messaging/webservice'
+OIM_EXT_FE_URL = f'http://{oimurl}'
+SOA_FRONTEND_URL = f'http://{soaurl}'
+SOA_T3_URL = f't3://{soaurl}'
+UMS_URL = f'http://{umsurl}/ucs/messaging/webservice'
 
 
 #connect to the oim admin server's runtime mbean server
@@ -45,7 +45,7 @@ domainRuntime()
 print("entering for loop")
 i=0
 while i<10:
-	i=i+1
+	i += 1
 	try:
 		print("Trying to invoke mbean")
 		mbs.invoke(msBean, 'integrateWithSOAServer', params, sign)
@@ -54,9 +54,7 @@ while i<10:
 	except:
 		st.sleep(120)
 		print("Command failed, will try again")
-		if i<9:
-			pass
-		else:
+		if i >= 9:
 			print("Failed to connect to oim mbeans after waiting for 20 Mins, please check your applications")
 			raise
 		continue

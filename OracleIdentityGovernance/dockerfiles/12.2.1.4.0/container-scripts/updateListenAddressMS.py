@@ -27,19 +27,19 @@ admin_host = sys.argv[4]
 admin_port = sys.argv[5]
 admin_usr = sys.argv[6]
 admin_pwd = sys.argv[7]
-serverPath = '/Servers/' + server
+serverPath = f'/Servers/{server}'
 
 #
 # Setting domain path
 # ===================
 domain_path  = domain_home
-admin_url = 't3://'+admin_host + ":" + admin_port
+admin_url = f't3://{admin_host}:{admin_port}'
 #
 # Read domain for updates
 # =======================
 # Connect to Edit tree(domain_path) and start Edit Session
-print("Admin URL -> " + admin_url)
-print("Server Path -> " + serverPath)
+print(f"Admin URL -> {admin_url}")
+print(f"Server Path -> {serverPath}")
 connect(admin_usr,admin_pwd, admin_url)
 edit()
 startEdit()
